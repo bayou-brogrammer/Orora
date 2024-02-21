@@ -1,0 +1,64 @@
+name: Build and Push Image
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # at 06:00 UTC (midnight CST)
+
+  pull_request:
+    branches:
+      - main
+      - testing
+    paths-ignore:
+      - "**.md"
+
+  push:
+    branches:
+      - main
+      - testing
+    tags:
+      - "v*.*.*"
+    paths-ignore:
+      - "**.md"
+
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: orora
+  IMAGE_FLAVOR: asus
+  AKMODS_FLAVOR: asus
+  FEDORA_MAJOR_VERSION: 39
+
+  CONTAINER_REF: asus
+  CONTAINER_REPO: ublue-os/bluefin
+
+jobs:
+  run-build:
+    name: Build uBlue-OS
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build image
+        uses: bayou-brogrammer/build-container-action@v1
+        with:
+          support: latest
+          push_container: "true"
+          target: ${{ env.IMAGE_NAME }}
+          image_name: ${{ env.IMAGE_NAME }}
+          image_variant: ${{ env.IMAGE_FLAVOR }}
+          container_ref: ${{ env.CONTAINER_REF }}
+          version: ${{ env.FEDORA_MAJOR_VERSION }}
+          container_repo: ${{ env.CONTAINER_REPO }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          container_registry: ghcr.io/${{ github.repository }}
+          extra_build_args: |
+            AKMODS_FLAVOR=${{ env.AKMODS_FLAVOR }}

@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1.3-labs
 
+ARG IMAGE_NAME="orora"
 ARG IMAGE_FLAVOR="asus"
+ARG IMAGE_REGISTRY="ghcr.io"
+ARG FEDORA_MAJOR_VERSION="40"
 ARG BASE_IMAGE_NAME="silverblue"
-ARG SOURCE_IMAGE="${BASE_IMAGE_NAME}-${IMAGE_FLAVOR}-main"
-ARG BASE_IMAGE="ghcr.io/bayou-brogrammer/${SOURCE_IMAGE}"
+ARG BASE_IMAGE="ghcr.io/bayou-brogrammer/silverblue-asus-main"
 
 # ============================================================================================== #
 # Config
@@ -11,6 +13,13 @@ ARG BASE_IMAGE="ghcr.io/bayou-brogrammer/${SOURCE_IMAGE}"
 
 FROM scratch as stage-config
 COPY ./config /config
+
+# ============================================================================================== #
+# Files
+# ============================================================================================== #
+
+FROM scratch as stage-files
+COPY ./config/files/usr /usr
 
 # ============================================================================================== #
 # Modules
@@ -23,13 +32,11 @@ COPY --from=ghcr.io/ublue-os/bling:latest /modules /modules
 COPY ./modules /modules
 
 # ============================================================================================== #
-# AKMODS
+# AKMODS - akmods:asus-39
 # ============================================================================================== #
 
 FROM scratch as stage-akmods-asus
-
-ARG AKMODS_FLAVOR="asus"
-COPY --from=ghcr.io/ublue-os/akmods:${AKMODS_FLAVOR}-39 /rpms /rpms
+COPY --from=ghcr.io/ublue-os/akmods:asus-39 /rpms /rpms
 
 # ============================================================================================== #
 # Exports
@@ -44,14 +51,14 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 # Orora Image
 # ============================================================================================== #
 
-FROM ${BASE_IMAGE} as orora
+FROM ${BASE_IMAGE}:latest as orora
 
-LABEL org.opencontainers.image.title="orora"
+LABEL org.opencontainers.image.title="${IMAGE_NAME}"
 LABEL org.opencontainers.image.description="A starting point"
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
 
 ARG BASE_IMAGE
-ARG IMAGE_NAME="orora"
+ARG IMAGE_NAME
 ARG IMAGE_REGISTRY="localhost"
 ARG RECIPE="./config/recipe.yml"
 ARG CONFIG_DIRECTORY="/tmp/config"
@@ -74,6 +81,6 @@ RUN \
   /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo"],"install":["starship"],"remove":["firefox","firefox-langpacks"]}' && \
   /tmp/modules/default-flatpaks/default-flatpaks.sh '{"type":"default-flatpaks","notify":true,"system":{"repo-url":"https://dl.flathub.org/repo/flathub.flatpakrepo","repo-name":"flathub","install":null,"remove":null},"user":{"repo-url":"https://dl.flathub.org/repo/flathub.flatpakrepo","repo-name":"flathub"}}'
 
-COPY ./config/files/usr /usr
+COPY --from=stage-files /usr /usr
 
 RUN ostree container commit

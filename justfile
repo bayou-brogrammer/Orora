@@ -2,7 +2,8 @@
 
 set shell := ["bash", "-uc"]
 
-IMAGE_NAME  := "orora-cli"
+IMAGE_NAME  := "orora"
+FILE        := "Dockerfile"
 
 default:
   just --list
@@ -24,25 +25,10 @@ setup-registry:
 # ================================
 
 build *FLAGS='':
-  buildah bud -t {{IMAGE_NAME}}:latest {{FLAGS}} --layers -v /var/cache/rpm-ostree:/var/cache/rpm-ostree:O
+  docker buildx build . -t {{IMAGE_NAME}}:latest {{FLAGS}} -f {{FILE}}
 build-no-cache:
 	just build --no-cache
 
 build-dev *FLAGS='':
-  buildah bud {{FLAGS}} -t registry.dev.local:5000/{{IMAGE_NAME}}:dev --layers -v /var/cache/rpm-ostree:/var/cache/rpm-ostree:O
-  buildah push --tls-verify=false registry.dev.local:5000/{{IMAGE_NAME}}:dev
-
-# ================================
-# DistroBox
-# ================================
-
-create-container:
-  distrobox create -i registry.dev.local:5000/{{IMAGE_NAME}}:dev -n {{IMAGE_NAME}}
-
-construct:
-  just teardown
-  just create-container
-  distrobox-enter {{IMAGE_NAME}}
-
-teardown :
-  distrobox-rm -f {{IMAGE_NAME}}
+  docker buildx build . {{FLAGS}} -t registry.dev.local:5000/{{IMAGE_NAME}}:dev -f {{FILE}}
+  docker push --tls-verify=false registry.dev.local:5000/{{IMAGE_NAME}}:dev

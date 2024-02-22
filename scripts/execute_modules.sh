@@ -9,8 +9,8 @@
 set -euo pipefail
 
 export CONFIG_DIRECTORY="/tmp/config"
-RECIPE_FILE="$CONFIG_DIRECTORY/$RECIPE"
 export MODULE_DIRECTORY="/tmp/modules"
+RECIPE_FILE="$CONFIG_DIRECTORY/$RECIPE"
 
 # https://mikefarah.gitbook.io/yq/usage/tips-and-tricks#yq-in-a-bash-loop
 get_yaml_array() {
@@ -54,8 +54,8 @@ run_modules() {
 declare -x IMAGE_NAME BASE_IMAGE OS_VERSION
 
 # Read configuration variables.
-BASE_IMAGE="$(yq '.base-image' "$RECIPE_FILE")"
 IMAGE_NAME="$(yq '.name' "$RECIPE_FILE")"
+BASE_IMAGE="$(yq '.base-image' "$RECIPE_FILE")"
 
 # Automatically determine which Fedora version we're building.
 OS_VERSION="$(grep -Po '(?<=VERSION_ID=)\d+' /usr/lib/os-release)"

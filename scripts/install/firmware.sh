@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wget https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-"$(rpm -E %fedora)"/lukenukem-asus-linux-fedora-"$(rpm -E %fedora)".repo -O /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo
+set -oue pipefail
 
 rpm-ostree install \
   asusctl \

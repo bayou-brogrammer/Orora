@@ -4,6 +4,7 @@ set shell := ["bash", "-uc"]
 
 IMAGE_NAME  := "orora"
 FILE        := "Dockerfile"
+IMAGE_REGISTRY := "ghcr.io/bayou-brogrammer"
 
 default:
   just --list
@@ -25,7 +26,7 @@ setup-registry:
 # ================================
 
 build *FLAGS='':
-  docker buildx build . -t {{IMAGE_NAME}}:latest {{FLAGS}} -f {{FILE}}
+  docker buildx build . -t {{IMAGE_REGISTRY}}/{{IMAGE_NAME}}:latest {{FLAGS}} -f {{FILE}}
 build-no-cache:
 	just build --no-cache
 

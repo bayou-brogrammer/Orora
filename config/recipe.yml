@@ -6,13 +6,13 @@ image-version: latest
 
 modules:
   ### 1. PRE-MODIFICATIONS
+  - type: containerfile
+    containerfiles:
+      - init
+
   - type: script
     scripts:
       - generate-image-info.sh
-
-  - type: containerfile
-    snippets:
-      - COPY ./system_files /
 
   ### 1. MODIFICATIONS
   ## make modifications desired in your image and install packages here, a few examples follow

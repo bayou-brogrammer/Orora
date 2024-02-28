@@ -21,7 +21,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="03661d44-37cb-4e64-b813-ae234585baa5"
+LABEL org.blue-build.build-id="9685bac0-af2c-436e-9814-62d0e1d2912c"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -37,6 +37,13 @@ ARG BASE_IMAGE="ghcr.io/ublue-os/bluefin-dx-asus"
 COPY --from=gcr.io/projectsigstore/cosign /ko-app/cosign /usr/bin/cosign
 COPY --from=docker.io/mikefarah/yq /usr/bin/yq /usr/bin/yq
 COPY --from=ghcr.io/blue-build/cli:latest-installer /out/bluebuild /usr/bin/bluebuild
+ARG IMAGE_VENDOR="${IMAGE_VENDOR}"
+ARG IMAGE_FLAVOR="${IMAGE_FLAVOR}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE}"
+ARG AKMODS_FLAVOR="${AKMODS_FLAVOR}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION}"
+
+COPY ./system_files /
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \
@@ -47,7 +54,6 @@ RUN \
   chmod +x /tmp/modules/script/script.sh \
   && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["generate-image-info.sh"]}' \
   && ostree container commit
-COPY ./system_files /
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \

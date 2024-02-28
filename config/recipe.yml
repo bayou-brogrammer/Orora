@@ -6,13 +6,13 @@ image-version: latest
 
 modules:
   ### 1. PRE-MODIFICATIONS
+  - type: containerfile
+    containerfiles:
+      - init
+
   - type: script
     scripts:
       - generate-image-info.sh
-
-  - type: containerfile
-    snippets:
-      - COPY ./system_files /
 
   ### 1. MODIFICATIONS
   ## make modifications desired in your image and install packages here, a few examples follow
@@ -25,8 +25,9 @@ modules:
 
   - type: rpm-ostree
     repos:
-      # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
+      - https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo
     install:
+      - neovim
     remove:
 
   - type: bling

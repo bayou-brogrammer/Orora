@@ -1,16 +1,18 @@
 name: Build Orora ISOs
-
 on:
   workflow_dispatch:
-
-concurrency:
-  cancel-in-progress: true
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build_iso.yml"
 
 env:
-  DOCKER_BUILDKIT: 1
-  BUILDX_EXPERIMENTAL: 1
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   build-iso:
@@ -19,13 +21,11 @@ jobs:
       contents: read
       packages: write
       id-token: write
-
     container:
       image: fedora:${{ matrix.major_version }}
       options: "--privileged"
       volumes:
         - "/:/host"
-
     strategy:
       fail-fast: false
       matrix:
@@ -34,26 +34,40 @@ jobs:
         image_tag: [latest]
     steps:
       - name: Build ISOs
-        #if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
-        uses: ublue-os/isogenerator@1.0.5
+        uses: ublue-os/isogenerator@main
+        id: build
         with:
           ARCH: x86_64
           VARIANT: "Silverblue"
+          IMAGE_REPO: ghcr.io/ublue-os
+          ENROLLMENT_PASSWORD: "ublue-os"
           IMAGE_TAG: ${{ matrix.image_tag }}
-          VERSION: ${{ matrix.major_version }}
           IMAGE_NAME: ${{ matrix.image_name }}
-          IMAGE_REPO: ghcr.io/bayou-brogrammer
-          ACTION_REPO: ublue-os/isogenerator
-          ACTION_REF: 1.0.5
+          VERSION: ${{ matrix.major_version }}
+          SECURE_BOOT_KEY_URL: "https://github.com/ublue-os/akmods/raw/main/certs/public_key.der"
 
-      - name: Upload ISOs and SHA Checksum Files to R2
+      - name: Upload ISOs and Checksum to Job Artifacts
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          retention-days: 0
+          compression-level: 0
+          if-no-files-found: error
+          path: ${{ steps.build.outputs.output-directory }}
+          name: ${{ matrix.image_name }}-${{ matrix.image_tag }}-${{ matrix.major_version}}
+
+      - name: Upload ISOs and Checksum to R2
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_REGION: auto
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          SOURCE_DIR: ${{ steps.build.outputs.output-directory }}
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         run: |
-          export RCLONE_CONFIG_R2_TYPE=s3
-          export RCLONE_CONFIG_R2_REGION=auto
-          export RCLONE_CONFIG_R2_PROVIDER=Cloudflare
-          export RCLONE_CONFIG_R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}
-          export RCLONE_CONFIG_R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}
-          export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}
           dnf install -y rclone
-          rclone copy ./end_iso R2:orora
+          rclone copy $SOURCE_DIR R2:orora

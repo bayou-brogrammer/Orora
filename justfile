@@ -24,6 +24,8 @@ setup-registry:
 # ================================
 # Building
 # ================================
+bb:
+  @bluebuild build
 
 build *FLAGS='':
   docker buildx build . -t {{IMAGE_REGISTRY}}/{{IMAGE_NAME}}:latest {{FLAGS}} -f {{FILE}}

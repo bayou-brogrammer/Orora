@@ -1,0 +1,60 @@
+name: orora
+description: This is my personal OS image.
+
+base-image: ghcr.io/ublue-os/bluefin-dx-asus
+image-version: latest
+
+modules:
+  ### 1. PRE-MODIFICATIONS
+  - type: script
+    scripts:
+      - generate-image-info.sh
+
+  - type: containerfile
+    snippets:
+      - COPY ./system_files /
+
+  ### 1. MODIFICATIONS
+  ## make modifications desired in your image and install packages here, a few examples follow
+
+  - type: akmods
+    base: asus
+    install:
+      - ryzen-smu
+      - zenergy
+
+  - type: rpm-ostree
+    repos:
+      # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
+    install:
+    remove:
+
+  - type: bling
+    install:
+        # - 1password # install 1Password (stable) and `op` CLI tool
+        # - laptop # installs TLP and configures your system for laptop usage
+        - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section
+
+  - type: default-flatpaks
+    notify: true # Send notification after install/uninstall is finished (true/false)
+    system:
+      # If no repo information is specified, Flathub will be used by default
+      # repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      # repo-name: flathub
+      # repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
+      install:
+        # - org.mozilla.firefox
+        # - org.gnome.Loupe
+        # - one.ablaze.floorp//lightning # This is an example of flatpak which has multiple branches in selection (flatpak//branch).
+      # Flatpak runtimes are not supported (like org.winehq.Wine//stable-23.08),
+      # only normal flatpak applications are (like Floorp Lightning web browser in this example).
+      # Installing different branches of the same Flatpak is not supported.
+      remove:
+      # - org.gnome.eog
+
+
+  ### 5. POST-MODIFICATIONS
+  ## these commands leave the image in a clean state after local modifications
+
+  # Cleanup & Finalize
+  - type: signing

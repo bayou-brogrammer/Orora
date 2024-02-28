@@ -50,7 +50,7 @@ jobs:
         uses: bayou-brogrammer/deploy-container-action@main
         with:
           support: latest
-          file: ./Dockerfile
+          file: ./Containerfile
           push_container: "true"
           target: ${{ env.IMAGE_NAME }}
           image_name: ${{ env.IMAGE_NAME }}

@@ -21,7 +21,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="03661d44-37cb-4e64-b813-ae234585baa5"
+LABEL org.blue-build.build-id="abf0f1ec-a959-42f0-809f-2306b11257c5"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -37,6 +37,15 @@ ARG BASE_IMAGE="ghcr.io/ublue-os/bluefin-dx-asus"
 COPY --from=gcr.io/projectsigstore/cosign /ko-app/cosign /usr/bin/cosign
 COPY --from=docker.io/mikefarah/yq /usr/bin/yq /usr/bin/yq
 COPY --from=ghcr.io/blue-build/cli:latest-installer /out/bluebuild /usr/bin/bluebuild
+
+ARG IMAGE_NAME="${IMAGE_NAME}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR}"
+ARG IMAGE_FLAVOR="${IMAGE_FLAVOR}"
+ARG AKMODS_FLAVOR="${AKMODS_FLAVOR}"
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION}"
+
+COPY ./system_files /
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \
@@ -47,7 +56,6 @@ RUN \
   chmod +x /tmp/modules/script/script.sh \
   && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["generate-image-info.sh"]}' \
   && ostree container commit
-COPY ./system_files /
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \
@@ -67,7 +75,7 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
-  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":null,"install":null,"remove":null}' \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["neovim"],"remove":null}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \
@@ -99,6 +107,8 @@ RUN \
   chmod +x /tmp/modules/signing/signing.sh \
   && source /tmp/exports.sh && /tmp/modules/signing/signing.sh '{"type":"signing"}' \
   && ostree container commit
+
+
 
 # Added in case a user adds something else using the
 # 'containerfile' module

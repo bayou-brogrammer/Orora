@@ -1,0 +1,5 @@
+[Unit]
+Description=orora-cli.target for orora-cli quadlet
+
+[Install]
+WantedBy=default.target

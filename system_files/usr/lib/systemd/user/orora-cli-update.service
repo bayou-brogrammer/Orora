@@ -1,0 +1,7 @@
+[Unit]
+Description=Restart orora-cli.service to rebuild container
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/podman pull ghcr.io/bayou-brogrammer/orora-cli:latest
+ExecStart=-/usr/bin/systemctl --user restart orora-cli.service

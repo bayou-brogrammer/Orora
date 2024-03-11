@@ -30,6 +30,10 @@ modules:
       - neovim
     remove:
 
+  - type: script
+    scripts:
+      - install-software.sh
+
   - type: bling
     install:
         # - 1password # install 1Password (stable) and `op` CLI tool
@@ -52,6 +56,10 @@ modules:
       # Installing different branches of the same Flatpak is not supported.
       remove:
       # - org.gnome.eog
+
+  - type: script
+    snippets:
+      -  echo "import \"/usr/share/ublue-os/just/80-orora.just\"" >> /usr/share/ublue-os/justfile
 
 
   ### 5. POST-MODIFICATIONS

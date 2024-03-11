@@ -21,7 +21,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="a8ad8a9b-672a-4a3d-81d0-eab2643284a1"
+LABEL org.blue-build.build-id="d7a9eca6-81fc-4736-ae87-24a212b6e8a6"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -84,6 +84,16 @@ RUN \
   --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
+  chmod +x /tmp/modules/script/script.sh \
+  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["install-software.sh"]}' \
+  && ostree container commit
+RUN \
+  --mount=type=tmpfs,target=/tmp \
+  --mount=type=tmpfs,target=/var \
+  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
+  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+  --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/bling/bling.sh \
   && source /tmp/exports.sh && /tmp/modules/bling/bling.sh '{"type":"bling","install":["flatpaksync"]}' \
   && ostree container commit
@@ -96,6 +106,16 @@ RUN \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/default-flatpaks/default-flatpaks.sh \
   && source /tmp/exports.sh && /tmp/modules/default-flatpaks/default-flatpaks.sh '{"type":"default-flatpaks","notify":true,"system":{"install":null,"remove":null}}' \
+  && ostree container commit
+RUN \
+  --mount=type=tmpfs,target=/tmp \
+  --mount=type=tmpfs,target=/var \
+  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
+  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+  --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
+  chmod +x /tmp/modules/script/script.sh \
+  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","snippets":["echo \"import \\\"/usr/share/ublue-os/just/80-orora.just\\\"\" >> /usr/share/ublue-os/justfile"]}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \

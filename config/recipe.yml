@@ -27,18 +27,24 @@ modules:
     repos:
       - https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo
     install:
+      - cargo
       - neovim
+      - rust
     remove:
 
   - type: script
     scripts:
       - install-software.sh
 
+  - type: containerfile
+    containerfiles:
+      - programs
+
   - type: bling
     install:
-        # - 1password # install 1Password (stable) and `op` CLI tool
-        # - laptop # installs TLP and configures your system for laptop usage
-        - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section
+      # - 1password # install 1Password (stable) and `op` CLI tool
+      # - laptop # installs TLP and configures your system for laptop usage
+      - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section
 
   - type: default-flatpaks
     notify: true # Send notification after install/uninstall is finished (true/false)
@@ -59,8 +65,7 @@ modules:
 
   - type: script
     snippets:
-      -  echo "import \"/usr/share/ublue-os/just/80-orora.just\"" >> /usr/share/ublue-os/justfile
-
+      - echo "import \"/usr/share/ublue-os/just/80-orora.just\"" >> /usr/share/ublue-os/justfile
 
   ### 5. POST-MODIFICATIONS
   ## these commands leave the image in a clean state after local modifications

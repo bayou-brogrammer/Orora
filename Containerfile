@@ -1,4 +1,3 @@
-
 # This stage is responsible for holding onto
 # your config without copying it directly into
 # the final image
@@ -21,7 +20,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="d7a9eca6-81fc-4736-ae87-24a212b6e8a6"
+LABEL org.blue-build.build-id="9cb5905f-e435-4b31-97e4-22ab916cd102"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -75,7 +74,7 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
-  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["neovim"],"remove":null}' \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["cargo","neovim","rust"],"remove":null}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \
@@ -87,6 +86,17 @@ RUN \
   chmod +x /tmp/modules/script/script.sh \
   && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["install-software.sh"]}' \
   && ostree container commit
+# Copy Bluefin CLI packages
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/atuin /usr/bin/atuin
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/delta /usr/bin/delta
+#COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/difftastic /usr/bin/difftastic
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/eza /usr/bin/eza
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fd /usr/bin/fd
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fzf /usr/bin/fzf
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/rg /usr/bin/rg
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/zoxide /usr/bin/zoxide
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/share/bash-prexec /usr/share/bash-prexec
+
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \

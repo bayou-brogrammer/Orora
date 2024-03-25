@@ -8,10 +8,11 @@ modules:
   - type: containerfile
     containerfiles:
       - init
+      - programs
 
   - type: script
     scripts:
-      - generate-image-info.sh
+      - base/generate-image-info.sh
 
   ### 2. MODIFICATIONS
   ## make modifications desired in your image and install packages here, a few examples follow
@@ -21,51 +22,14 @@ modules:
       - ryzen-smu
       - zenergy
 
-  - type: rpm-ostree
-    repos:
-      - https://copr.fedorainfracloud.org/coprs/varlad/helix/repo/fedora-%OS_VERSION%/varlad-helix-fedora-%OS_VERSION%.repo
-      - https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo
-    install:
-      - cargo
-      - helix
-      - neovim
-      - rust
-    remove:
+  # Packages
+  - from-file: recipes/base/packages.yml
+  - from-file: recipes/sddm/packages.yml
+  - from-file: recipes/hyprland/packages.yml
 
-  - type: script
-    scripts:
-      - install-software.sh
-
-  - type: containerfile
-    containerfiles:
-      - programs
-
-  - type: bling
-    install:
-      # - 1password # install 1Password (stable) and `op` CLI tool
-      # - laptop # installs TLP and configures your system for laptop usage
-      - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section
-
-  - type: default-flatpaks
-    notify: true # Send notification after install/uninstall is finished (true/false)
-    system:
-      # If no repo information is specified, Flathub will be used by default
-      # repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
-      # repo-name: flathub
-      # repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
-      install:
-      # - org.mozilla.firefox
-      # - org.gnome.Loupe
-      # - one.ablaze.floorp//lightning # This is an example of flatpak which has multiple branches in selection (flatpak//branch).
-      # Flatpak runtimes are not supported (like org.winehq.Wine//stable-23.08),
-      # only normal flatpak applications are (like Floorp Lightning web browser in this example).
-      # Installing different branches of the same Flatpak is not supported.
-      remove:
-      # - org.gnome.eog
-
-  - type: script
-    snippets:
-      - echo "import \"/usr/share/ublue-os/just/80-orora.just\"" >> /usr/share/ublue-os/justfile
+  # Scripting
+  - from-file: recipes/base/scripts.yml
+  - from-file: recipes/hyprland/scripts.yml
 
   ### 5. POST-MODIFICATIONS
   ## these commands leave the image in a clean state after local modifications

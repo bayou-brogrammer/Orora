@@ -1,0 +1,6 @@
+type: script
+scripts:
+  - base/software.sh
+  - base/just.sh
+  - sddm/settheming.sh
+  - sddm/setsddmtheming.sh

@@ -1,0 +1,92 @@
+modules:
+  - type: rpm-ostree
+    repos:
+      - https://copr.fedorainfracloud.org/coprs/varlad/helix/repo/fedora-%OS_VERSION%/varlad-helix-fedora-%OS_VERSION%.repo
+      - https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo
+    install:
+      # Programs
+      - cargo
+      - helix
+      - neovim
+      - rust
+
+      # launcher
+      - rofi-wayland
+
+      # environment
+      - xorg-x11-server-Xwayland
+      - polkit
+      - lxpolkit
+      - xdg-user-dirs
+      - dbus-tools
+      - dbus-daemon
+      - wl-clipboard
+      - gnome-keyring
+      - pavucontrol
+      - playerctl
+      - qt5-qtwayland
+      - qt6-qtwayland
+      - vulkan-validation-layers
+      - vulkan-tools
+      - google-noto-emoji-fonts
+      - gnome-disk-utility
+
+      # sound
+      - wireplumber
+      - pipewire
+      - pamixer
+
+      # networking
+      - network-manager-applet
+      - NetworkManager-openvpn
+      - NetworkManager-openconnect
+      - bluez
+      - bluez-tools
+      - blueman
+
+      # file manager
+      - thunar
+      - thunar-archive-plugin
+      - thunar-volman
+      - xarchiver
+      - imv
+      - p7zip
+      - unrar-free
+
+      # screenshot
+      - slurp
+      - grim
+
+      # display
+      - wlr-randr
+      - wlsunset
+      - grimshot
+      - brightnessctl
+      - swaylock
+      - swayidle
+      - kanshi
+
+      # terminal
+      - foot
+
+      # notifications
+      - dunst
+
+      # mpv, since flatpak mpv and celluloid have issues
+      - mpv
+
+      # theme and GUI
+      - adwaita-qt5
+      - fontawesome-fonts-all
+      - gnome-themes-extra
+      - gnome-icon-theme
+      - paper-icon-theme
+      - breeze-icon-theme
+      - papirus-icon-theme
+    remove:
+  
+  - type: bling
+    install:
+      # - laptop # installs TLP and configures your system for laptop usage
+      - 1password # install 1Password (stable) and `op` CLI tool
+      - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section

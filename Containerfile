@@ -21,7 +21,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="92b1141e-572d-4066-8781-f1479d0108b9"
+LABEL org.blue-build.build-id="5b9add58-004c-415c-ba28-06cb09a1ad88"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -46,6 +46,16 @@ ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION}"
 
 COPY ./system_files /
+# Copy Bluefin CLI packages
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/atuin /usr/bin/atuin
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/delta /usr/bin/delta
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/eza /usr/bin/eza
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fd /usr/bin/fd
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fzf /usr/bin/fzf
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/rg /usr/bin/rg
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/zoxide /usr/bin/zoxide
+COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/share/bash-prexec /usr/share/bash-prexec
+
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \
@@ -54,7 +64,7 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/script/script.sh \
-  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["generate-image-info.sh"]}' \
+  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["base/generate-image-info.sh"]}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \
@@ -75,29 +85,8 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
-  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/varlad/helix/repo/fedora-%OS_VERSION%/varlad-helix-fedora-%OS_VERSION%.repo","https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["cargo","helix","neovim","rust"],"remove":null}' \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/varlad/helix/repo/fedora-%OS_VERSION%/varlad-helix-fedora-%OS_VERSION%.repo","https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["cargo","helix","neovim","rust","rofi-wayland","xorg-x11-server-Xwayland","polkit","lxpolkit","xdg-user-dirs","dbus-tools","dbus-daemon","wl-clipboard","gnome-keyring","pavucontrol","playerctl","qt5-qtwayland","qt6-qtwayland","vulkan-validation-layers","vulkan-tools","google-noto-emoji-fonts","gnome-disk-utility","wireplumber","pipewire","pamixer","network-manager-applet","NetworkManager-openvpn","NetworkManager-openconnect","bluez","bluez-tools","blueman","thunar","thunar-archive-plugin","thunar-volman","xarchiver","imv","p7zip","unrar-free","slurp","grim","wlr-randr","wlsunset","grimshot","brightnessctl","swaylock","swayidle","kanshi","foot","dunst","mpv","adwaita-qt5","fontawesome-fonts-all","gnome-themes-extra","gnome-icon-theme","paper-icon-theme","breeze-icon-theme","papirus-icon-theme"],"remove":null}' \
   && ostree container commit
-RUN \
-  --mount=type=tmpfs,target=/tmp \
-  --mount=type=tmpfs,target=/var \
-  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
-  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
-  --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
-  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
-  chmod +x /tmp/modules/script/script.sh \
-  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["install-software.sh"]}' \
-  && ostree container commit
-# Copy Bluefin CLI packages
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/atuin /usr/bin/atuin
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/delta /usr/bin/delta
-#COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/difftastic /usr/bin/difftastic
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/eza /usr/bin/eza
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fd /usr/bin/fd
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/fzf /usr/bin/fzf
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/rg /usr/bin/rg
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/zoxide /usr/bin/zoxide
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/share/bash-prexec /usr/share/bash-prexec
-
 RUN \
   --mount=type=tmpfs,target=/tmp \
   --mount=type=tmpfs,target=/var \
@@ -106,7 +95,7 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/bling/bling.sh \
-  && source /tmp/exports.sh && /tmp/modules/bling/bling.sh '{"type":"bling","install":["flatpaksync"]}' \
+  && source /tmp/exports.sh && /tmp/modules/bling/bling.sh '{"type":"bling","install":["1password","flatpaksync"]}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \
@@ -115,8 +104,18 @@ RUN \
   --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
-  chmod +x /tmp/modules/default-flatpaks/default-flatpaks.sh \
-  && source /tmp/exports.sh && /tmp/modules/default-flatpaks/default-flatpaks.sh '{"type":"default-flatpaks","notify":true,"system":{"install":null,"remove":null}}' \
+  chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","install":["sddm","sddm-themes"]}' \
+  && ostree container commit
+RUN \
+  --mount=type=tmpfs,target=/tmp \
+  --mount=type=tmpfs,target=/var \
+  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
+  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+  --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
+  chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","install":["hyprland","waybar","xdg-desktop-portal-hyprland","brightnessctl"]}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \
@@ -126,7 +125,17 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/script/script.sh \
-  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","snippets":["echo \"import \\\"/usr/share/ublue-os/just/80-orora.just\\\"\" >> /usr/share/ublue-os/justfile"]}' \
+  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["base/software.sh","base/just.sh","sddm/settheming.sh","sddm/setsddmtheming.sh"]}' \
+  && ostree container commit
+RUN \
+  --mount=type=tmpfs,target=/tmp \
+  --mount=type=tmpfs,target=/var \
+  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
+  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+  --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
+  chmod +x /tmp/modules/script/script.sh \
+  && source /tmp/exports.sh && /tmp/modules/script/script.sh '{"type":"script","scripts":["hyprland/removeunprofessionalwallpapers.sh"]}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \

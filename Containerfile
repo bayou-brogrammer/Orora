@@ -1,3 +1,4 @@
+
 # This stage is responsible for holding onto
 # your config without copying it directly into
 # the final image
@@ -20,7 +21,7 @@ RUN printf "#!/usr/bin/env bash\n\nget_yaml_array() { \n  readarray -t \"\$1\" <
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="9cb5905f-e435-4b31-97e4-22ab916cd102"
+LABEL org.blue-build.build-id="92b1141e-572d-4066-8781-f1479d0108b9"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -74,7 +75,7 @@ RUN \
   --mount=type=bind,from=stage-exports,src=/exports.sh,dst=/tmp/exports.sh \
   --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
   chmod +x /tmp/modules/rpm-ostree/rpm-ostree.sh \
-  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["cargo","neovim","rust"],"remove":null}' \
+  && source /tmp/exports.sh && /tmp/modules/rpm-ostree/rpm-ostree.sh '{"type":"rpm-ostree","repos":["https://copr.fedorainfracloud.org/coprs/varlad/helix/repo/fedora-%OS_VERSION%/varlad-helix-fedora-%OS_VERSION%.repo","https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo"],"install":["cargo","helix","neovim","rust"],"remove":null}' \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/tmp \

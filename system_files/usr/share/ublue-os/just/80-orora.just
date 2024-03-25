@@ -15,3 +15,7 @@ disconnect-home:
     #!/bin/bash
     echo "Disconnecting from home"
     tailscale down
+
+install-nix:
+    #!/bin/bash
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install

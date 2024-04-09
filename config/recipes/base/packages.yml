@@ -1,3 +1,4 @@
+---
 modules:
   - type: rpm-ostree
     repos:
@@ -5,10 +6,8 @@ modules:
       - https://copr.fedorainfracloud.org/coprs/agriffis/neovim-nightly/repo/fedora-%OS_VERSION%/agriffis-neovim-nightly-fedora-%OS_VERSION%.repo
     install:
       # Programs
-      - cargo
       - helix
       - neovim
-      - rust
 
       # launcher
       - rofi-wayland
@@ -83,10 +82,8 @@ modules:
       - paper-icon-theme
       - breeze-icon-theme
       - papirus-icon-theme
-    remove:
-  
   - type: bling
     install:
-      # - laptop # installs TLP and configures your system for laptop usage
+      # - laptop  # installs TLP and configures your system for laptop usage
       - 1password # install 1Password (stable) and `op` CLI tool
       - flatpaksync # allows synchronization of user-installed flatpaks, see separate documentation section

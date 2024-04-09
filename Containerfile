@@ -33,7 +33,7 @@ COPY cosign.pub /keys/orora.pub
 
 FROM ghcr.io/ublue-os/bluefin-dx-asus:latest
 
-LABEL org.blue-build.build-id="36166856-0c89-4d60-af39-7d8c6301077d"
+LABEL org.blue-build.build-id="2b77988f-947e-4ea3-ac7f-67d54b9b8fa4"
 LABEL org.opencontainers.image.title="orora"
 LABEL org.opencontainers.image.description="This is my personal OS image."
 LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/blue-build/cli/main/README.md
@@ -145,6 +145,18 @@ RUN \
   && source /tmp/exports.sh \
   && /tmp/modules/script/script.sh '{"type":"script","scripts":["base/software.sh","base/just.sh","sddm/settheming.sh","sddm/setsddmtheming.sh"]}' \
   && echo "========== End Script module ==========" \
+  && ostree container commit
+RUN \
+  --mount=type=tmpfs,target=/var \
+  --mount=type=bind,from=stage-config,src=/config,dst=/tmp/config,rw \
+  --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+  --mount=type=bind,from=ghcr.io/blue-build/cli:exports,src=/exports.sh,dst=/tmp/exports.sh \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-orora-latest,sharing=locked \
+  echo "========== Start Systemd module ==========" \
+  && chmod +x /tmp/modules/systemd/systemd.sh \
+  && source /tmp/exports.sh \
+  && /tmp/modules/systemd/systemd.sh '{"type":"systemd","system":{"enabled":["sddm-boot.service"]}}' \
+  && echo "========== End Systemd module ==========" \
   && ostree container commit
 RUN \
   --mount=type=tmpfs,target=/var \

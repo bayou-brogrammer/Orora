@@ -1,3 +1,0 @@
-# Copy Bluefin CLI packages
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/bin/atuin /usr/bin/atuin
-COPY --from=ghcr.io/bayou-brogrammer/orora-cli /usr/share/bash-prexec /usr/share/bash-prexec

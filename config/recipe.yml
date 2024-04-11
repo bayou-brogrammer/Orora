@@ -6,7 +6,7 @@ image-version: latest
 modules:
   ### 1. PRE-MODIFICATIONS
   - type: containerfile
-    containerfiles: [init, programs]
+    containerfiles: [init]
   - type: script
     scripts:
       - base/generate-image-info.sh
